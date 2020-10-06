@@ -47,6 +47,14 @@ public class V {
         return ans;
     }
 
+    public V crossProduct(V v) {
+        double new_arr[] = new double[arr.length];
+        new_arr[0] = arr[1] * v.arr[2] - arr[2] * v.arr[1];
+        new_arr[1] = arr[2] * v.arr[0] - arr[0] * v.arr[2];
+        new_arr[2] = arr[0] * v.arr[1] - arr[1] * v.arr[0];
+        return new V(new_arr);
+    }
+
     public double norm() {
         double a = 0;
         for (int i = 0; i < arr.length; i++) {

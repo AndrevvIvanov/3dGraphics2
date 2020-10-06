@@ -11,7 +11,7 @@ public class Render {
             int x = 250;
             int y = 100;
             V v1 = figures.get(i)[0][0];
-            V v2 = figures.get(i)[1][0];//
+            V v2 = figures.get(i)[1][0];
             V v3 = figures.get(i)[2][0];
             renderLine(img, (int) v1.arr[0] + x, (int) v1.arr[1] + y, (int) v2.arr[0] + x, (int) v2.arr[1] + y, Color.BLACK);
             renderLine(img, (int) v2.arr[0] + x, (int) v2.arr[1] + y, (int) v3.arr[0] + x, (int) v3.arr[1] + y, Color.BLACK);
@@ -25,8 +25,6 @@ public class Render {
             V v3 = figures.get(i)[2][0];
             renderTriangle(img, (int)v1.arr[0]+x, (int)v1.arr[1]+y,(int)v2.arr[0]+x, (int)v2.arr[1]+y,(int)v3.arr[0]+x, (int)v3.arr[1]+y, new Color((255*i)/figures.size(),(255*i)/figures.size(),(255*i)/figures.size()));
         }
-
-
     }
 
 

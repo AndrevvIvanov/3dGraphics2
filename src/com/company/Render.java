@@ -23,13 +23,25 @@ public class Render {
             V v1 = figures.get(i)[0][0];
             V v2 = figures.get(i)[1][0];
             V v3 = figures.get(i)[2][0];
-            renderTriangle(img, (int)v1.arr[0]+x, (int)v1.arr[1]+y,(int)v2.arr[0]+x, (int)v2.arr[1]+y,(int)v3.arr[0]+x, (int)v3.arr[1]+y, new Color((255*i)/figures.size(),(255*i)/figures.size(),(255*i)/figures.size()));
+            V a = v2.sub(v1);
+            V b = v3.sub(v1);
+            V t = a.crossProduct(b);
+            t=t.scalarMult(1/t.norm());
+            double[] view = {0, 0, -1};
+            V l = new V(view);
+            double check = t.scalarProduct(l);
+            if (check >= 0) {
+                System.out.println(check);
+                renderTriangle(img, (int) v1.arr[0] + x, (int) v1.arr[1] + y, (int) v2.arr[0] + x, (int) v2.arr[1] + y, (int) v3.arr[0] + x, (int) v3.arr[1] + y, new Color((int) (check * 255), (int)( check * 255), (int) (check * 255)));
+                // renderLineTriangle(img, (int) v1.arr[0] + x, (int) v1.arr[1] + y, (int) v2.arr[0] + x, (int) v2.arr[1] + y, (int) v3.arr[0] + x, (int) v3.arr[1] + y, new Color(0,0,0));
+
+            }
         }
     }
 
 
     public static void renderLine(BufferedImage img, int x1, int y1, int x2, int y2, Color c) {
-        if(x1 ==x2 && y1 == y2){
+        if (x1 == x2 && y1 == y2) {
             img.setRGB(x1, y2, c.getRGB());
             return;
         }
@@ -104,6 +116,13 @@ public class Render {
                 }
             }
         }
+    }
+
+
+    public static void renderLineTriangle(BufferedImage img, int x1, int y1, int x2, int y2, int x3, int y3, Color c) {
+        renderLine(img, x1, y1, x2, y2, c);
+        renderLine(img, x2, y2, x3, y3, c);
+        renderLine(img, x3, y3, x1, y1, c);
     }
 
 

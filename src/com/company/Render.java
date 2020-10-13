@@ -7,16 +7,6 @@ import java.util.ArrayList;
 public class Render {
 
     public static void render(BufferedImage img, ArrayList<V[][]> figures) {
-       /* for (int i = 0; i < figures.size(); i++) {
-            int x = 250;
-            int y = 100;
-            V v1 = figures.get(i)[0][0];
-            V v2 = figures.get(i)[1][0];
-            V v3 = figures.get(i)[2][0];
-            renderLine(img, (int) v1.arr[0] + x, (int) v1.arr[1] + y, (int) v2.arr[0] + x, (int) v2.arr[1] + y, Color.BLACK);
-            renderLine(img, (int) v2.arr[0] + x, (int) v2.arr[1] + y, (int) v3.arr[0] + x, (int) v3.arr[1] + y, Color.BLACK);
-            renderLine(img, (int) v3.arr[0] + x, (int) v3.arr[1] + y, (int) v1.arr[0] + x, (int) v1.arr[1] + y, Color.BLACK);
-        }*/
         for (int i = 0; i < figures.size(); i++) {
             int x = 250;
             int y = 100;
@@ -31,11 +21,9 @@ public class Render {
             V l = new V(view);
             double check = t.scalarProduct(l);
             if (check >= 0) {
-                System.out.println(check);
                 renderTriangle(img, (int) v1.arr[0] + x, (int) v1.arr[1] + y, (int) v2.arr[0] + x, (int) v2.arr[1] + y, (int) v3.arr[0] + x, (int) v3.arr[1] + y, new Color((int) (check * 255), (int)( check * 255), (int) (check * 255)));
-                // renderLineTriangle(img, (int) v1.arr[0] + x, (int) v1.arr[1] + y, (int) v2.arr[0] + x, (int) v2.arr[1] + y, (int) v3.arr[0] + x, (int) v3.arr[1] + y, new Color(0,0,0));
-
             }
+
         }
     }
 

@@ -32,38 +32,58 @@ public class Render {
             V v1 = figures.get(i)[0][0];
             V v2 = figures.get(i)[1][0];
             V v3 = figures.get(i)[2][0];
+            V normal1 = figures.get(i)[0][2];
+            V normal2 = figures.get(i)[1][2];
+            V normal3 = figures.get(i)[2][2];
+
+            double alpha = 30 * (Math.PI / 180);
+            double beta = 60 * (Math.PI / 180);
+            double gamma = 180 * (Math.PI / 180);
+
+            v1 = rotate(alpha, beta, gamma, v1);
+            v2 = rotate(alpha, beta, gamma, v2);
+            v3 = rotate(alpha, beta, gamma, v3);
+            normal1 = rotate(alpha, beta, gamma, normal1);
+            normal2 = rotate(alpha, beta, gamma, normal2);
+            normal3 = rotate(alpha, beta, gamma, normal3);
+
             V a = v2.sub(v1);
             V b = v3.sub(v1);
             V t = a.crossProduct(b);
             t = t.scalarMult(1 / t.norm());
-            double[] view = {0, 0, -1};
-            V l = new V(view);
+            V l = new V(new double[]{0, 0, -1});
             double check = t.scalarProduct(l);
-            double alpha = 0;
-            double beta = Math.PI;
-            double gamma = 0;
-            if (check >= 0) {
-                Matrix Rx = new Matrix(new double[][]
-                        {{1, 0, 0},
-                                {0, Math.cos(alpha), -Math.sin(alpha)},
-                                {0, Math.sin(alpha), Math.cos(alpha)}});
-                Matrix Ry = new Matrix(new double[][]
-                        {{Math.cos(beta), 0, Math.sin(beta)},
-                                {0, 1, 0},
-                                {-Math.sin(beta), 0, Math.cos(beta)}});
-                Matrix Rz = new Matrix(new double[][]
-                        {{Math.cos(gamma), -Math.sin(gamma), 0},
-                                {Math.sin(gamma), Math.cos(gamma), 0},
-                                {0, 0, 1}});
-                Matrix R = Rx.Mult((Ry.Mult(Rz)));
+            double n1 = normal1.scalarProduct(l);
+            double n2 = normal2.scalarProduct(l);
+            double n3 = normal3.scalarProduct(l);
 
-                v1 = R.vectorMult(v1);
-                v2 = R.vectorMult(v2);
-                v3 = R.vectorMult(v3);
-                Triangle(img, v1, v2, v3, new Color((int) (check * 255), (int) (check * 255), (int) (check * 255)));
+            if (check >= 0) {
+                V v = new V(new double[]{500, 500, 0});
+                v1 = v1.sum(v);
+                v2 = v2.sum(v);
+                v3 = v3.sum(v);
+                Triangle(img, v1, v2, v3,  n1, n2, n3);
                 //Triangle(img, v1, v2, v3, new Color(0, 0, 0));
             }
         }
+    }
+
+
+    public static V rotate(double alpha, double beta, double gamma, V v) {
+        Matrix Rx = new Matrix(new double[][]
+                {{1, 0, 0},
+                        {0, Math.cos(alpha), -Math.sin(alpha)},
+                        {0, Math.sin(alpha), Math.cos(alpha)}});
+        Matrix Ry = new Matrix(new double[][]
+                {{Math.cos(beta), 0, Math.sin(beta)},
+                        {0, 1, 0},
+                        {-Math.sin(beta), 0, Math.cos(beta)}});
+        Matrix Rz = new Matrix(new double[][]
+                {{Math.cos(gamma), -Math.sin(gamma), 0},
+                        {Math.sin(gamma), Math.cos(gamma), 0},
+                        {0, 0, 1}});
+        Matrix R = Rx.Mult((Ry.Mult(Rz)));
+        return R.vectorMult(v);
     }
 
 
@@ -107,7 +127,7 @@ public class Render {
     }
 
 
-    public static void Triangle(BufferedImage img, V v1, V v2, V v3, Color c) {
+    public static void Triangle(BufferedImage img, V v1, V v2, V v3, double n1, double n2, double n3) {
         double x1 = v1.arr[0];
         double y1 = v1.arr[1];
         double z1 = v1.arr[2];
@@ -125,14 +145,14 @@ public class Render {
         minx = Math.max(Math.min(Main.w - 1, minx), 0);
         int maxx = (int) Math.max(x1, x2);
         maxx = (int) Math.max(x3, maxx);
-        maxx = Math.min(Math.max(0, maxx), 1366);
+        maxx = Math.min(Math.max(0, maxx), 1365);
 
         int miny = (int) Math.min(y1, y2);
         miny = (int) Math.min(y3, miny);
         miny = Math.max(Math.min(Main.h - 1, miny), 0);
         int maxy = (int) Math.max(y1, y2);
         maxy = (int) Math.max(y3, maxy);
-        maxy = Math.min(Math.max(0, maxy), 768);
+        maxy = Math.min(Math.max(0, maxy), 767);
 
         for (int i = minx; i <= maxx; i++) {
             for (int j = miny; j <= maxy; j++) {
@@ -149,9 +169,11 @@ public class Render {
                 double v = (PA.x * AB.y - AB.x * PA.y) / (AB.x * AC.y - AC.x * AB.y);
 
                 double z = z2 * u + z3 * v + z1 * (1 - u - v);
+                double n = n1 * (1 - u - v) + n2 * u + n3 * v;
+                n = Math.max(0, n);
 
                 if (u + v <= 1 && u >= 0 && v >= 0 && z_buffer[i][j] >= z) {
-                    img.setRGB(i, j, c.getRGB());
+                    img.setRGB(i, j, new Color((int) (n * 255), (int) (n * 255), (int) (n * 255)).getRGB());
                     z_buffer[i][j] = z;
                 }
             }

@@ -18,15 +18,6 @@ public class Render {
 
 
     public static void render(BufferedImage img, ArrayList<V[][]> figures) {
-       /* V v11 = new V(new double[]{100, 100, 100});
-        V v21 = new V(new double[]{200, 100, 100});
-        V v31 = new V(new double[]{100, 200, 100});
-        Triangle(img, v11, v21, v31, Color.BLACK);
-        V v12 = new V(new double[]{100, 100, 200});
-        V v22 = new V(new double[]{300, 100, 200});
-        V v32 = new V(new double[]{100, 200, 200});
-        Triangle(img, v12, v22, v32, Color.RED);
-        renderTriangle(img, 100, 100, 200, 100, 100, 200, new Color(0, 0, 0));*/
 
         for (int i = 0; i < figures.size(); i++) {
             V v1 = figures.get(i)[0][0];
@@ -36,8 +27,8 @@ public class Render {
             V normal2 = figures.get(i)[1][2];
             V normal3 = figures.get(i)[2][2];
 
-            double alpha = 30 * (Math.PI / 180);
-            double beta = 60 * (Math.PI / 180);
+            double alpha = -91 * (Math.PI / 180);
+            double beta = 90 * (Math.PI / 180);
             double gamma = 180 * (Math.PI / 180);
 
             v1 = rotate(alpha, beta, gamma, v1);
@@ -58,7 +49,7 @@ public class Render {
             double n3 = normal3.scalarProduct(l);
 
             if (check >= 0) {
-                V v = new V(new double[]{500, 500, 0});
+                V v = new V(new double[]{500, 550, 0});
                 v1 = v1.sum(v);
                 v2 = v2.sum(v);
                 v3 = v3.sum(v);

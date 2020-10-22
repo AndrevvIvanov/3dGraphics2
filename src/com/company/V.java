@@ -63,8 +63,10 @@ public class V {
         return Math.sqrt(a);
     }
 
-    public  V normalize(){
-
+    public void normalize() {
+        for (int i = 0; i < arr.length; i++) {
+            arr[i] = arr[i] / norm();
+        }
     }
 
 

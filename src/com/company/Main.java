@@ -29,7 +29,7 @@ public class Main extends JFrame {
 
     public static void draw(Graphics2D g) {
         BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-        Render.render(img, figures,texture);
+        Render.render(img, figures, texture);
         g.drawImage(img, 0, 0, null);
     }
 

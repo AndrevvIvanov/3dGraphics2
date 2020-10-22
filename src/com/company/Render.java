@@ -31,7 +31,7 @@ public class Render {
             V texture_coordinates3 = figures.get(i)[2][1];
 
             double alpha = 30 * (Math.PI / 180);
-            double beta = 30 * (Math.PI / 180);
+            double beta = 60 * (Math.PI / 180);
             double gamma = 180 * (Math.PI / 180);
 
             v1 = rotate(alpha, beta, gamma, v1);
@@ -47,6 +47,7 @@ public class Render {
             t = t.scalarMult(1 / t.norm());
             V l = new V(new double[]{0, 0, -1});
             double check = t.scalarProduct(l);
+
             double n1 = normal1.scalarProduct(l);
             double n2 = normal2.scalarProduct(l);
             double n3 = normal3.scalarProduct(l);

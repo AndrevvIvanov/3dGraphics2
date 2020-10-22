@@ -63,5 +63,9 @@ public class V {
         return Math.sqrt(a);
     }
 
+    public  V normalize(){
+
+    }
+
 
 }

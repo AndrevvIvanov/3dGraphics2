@@ -25,10 +25,11 @@ public class Main extends JFrame {
     static ArrayList<V> texture_coordinates = new ArrayList<>();
     static ArrayList<V> normals = new ArrayList<>();
     static ArrayList<V[][]> figures = new ArrayList<>();
+    static BufferedImage texture = null;
 
     public static void draw(Graphics2D g) {
         BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-        Render.render(img, figures);
+        Render.render(img, figures,texture);
         g.drawImage(img, 0, 0, null);
     }
 
@@ -78,6 +79,13 @@ public class Main extends JFrame {
 
                 figures.add(figure);
             }
+        }
+
+
+        try {
+            texture = ImageIO.read(new File("uaz_med_white_d.png"));
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
 

@@ -17,7 +17,7 @@ public class Render {
     }
 
 
-    public static void render(BufferedImage img, ArrayList<V[][]> figures) {
+    public static void render(BufferedImage img, ArrayList<V[][]> figures, BufferedImage texture) {
 
         for (int i = 0; i < figures.size(); i++) {
             V v1 = figures.get(i)[0][0];
@@ -26,9 +26,12 @@ public class Render {
             V normal1 = figures.get(i)[0][2];
             V normal2 = figures.get(i)[1][2];
             V normal3 = figures.get(i)[2][2];
+            V texture_coordinates1 = figures.get(i)[0][1];
+            V texture_coordinates2 = figures.get(i)[1][1];
+            V texture_coordinates3 = figures.get(i)[2][1];
 
-            double alpha = -91 * (Math.PI / 180);
-            double beta = 90 * (Math.PI / 180);
+            double alpha = 30 * (Math.PI / 180);
+            double beta = 30 * (Math.PI / 180);
             double gamma = 180 * (Math.PI / 180);
 
             v1 = rotate(alpha, beta, gamma, v1);
@@ -53,7 +56,7 @@ public class Render {
                 v1 = v1.sum(v);
                 v2 = v2.sum(v);
                 v3 = v3.sum(v);
-                Triangle(img, v1, v2, v3,  n1, n2, n3);
+                Triangle(img, v1, v2, v3, n1, n2, n3, texture_coordinates1, texture_coordinates2, texture_coordinates3, texture);
                 //Triangle(img, v1, v2, v3, new Color(0, 0, 0));
             }
         }
@@ -118,7 +121,7 @@ public class Render {
     }
 
 
-    public static void Triangle(BufferedImage img, V v1, V v2, V v3, double n1, double n2, double n3) {
+    public static void Triangle(BufferedImage img, V v1, V v2, V v3, double n1, double n2, double n3, V texture_coordinates1, V texture_coordinates2, V texture_coordinates3,BufferedImage texture) {
         double x1 = v1.arr[0];
         double y1 = v1.arr[1];
         double z1 = v1.arr[2];
@@ -159,12 +162,22 @@ public class Render {
                 double u = (AC.x * PA.y - PA.x * AC.y) / (AB.x * AC.y - AC.x * AB.y);
                 double v = (PA.x * AB.y - AB.x * PA.y) / (AB.x * AC.y - AC.x * AB.y);
 
-                double z = z2 * u + z3 * v + z1 * (1 - u - v);
+                double z = z1 * (1 - u - v) + z2 * u + z3 * v;
                 double n = n1 * (1 - u - v) + n2 * u + n3 * v;
                 n = Math.max(0, n);
 
+
+                double texture_x = (texture_coordinates1.arr[0] * (1 - u - v) + texture_coordinates2.arr[0] * u + texture_coordinates3.arr[0] * v)*texture.getWidth();
+                double texture_y = (1-(texture_coordinates1.arr[1] * (1 - u - v) + texture_coordinates2.arr[1] * u + texture_coordinates3.arr[1] * v))*texture.getHeight();
+
+
                 if (u + v <= 1 && u >= 0 && v >= 0 && z_buffer[i][j] >= z) {
-                    img.setRGB(i, j, new Color((int) (n * 255), (int) (n * 255), (int) (n * 255)).getRGB());
+                    int rgb=texture.getRGB((int)texture_x,(int)texture_y);
+                    Color textureColor=new Color(rgb);
+                    int textureColorR=textureColor.getRed();
+                    int textureColorG=textureColor.getGreen();
+                    int textureColorB=textureColor.getBlue();
+                    img.setRGB(i, j, new Color((int) (n * textureColorR), (int) (n * textureColorG), (int) (n * textureColorB)).getRGB());
                     z_buffer[i][j] = z;
                 }
             }

@@ -6,33 +6,19 @@ import java.util.ArrayList;
 
 public class Render {
 
-    static double[][] z_buffer = new double[Main.w][Main.h];
 
-    {
-        for (int i = 0; i < Main.h; i++) {
-            for (int j = 0; j < Main.w; j++) {
-                z_buffer[i][j] = Double.POSITIVE_INFINITY;
-            }
-        }
-    }
-
-
-    public static void render(BufferedImage img, ArrayList<V[][]> figures, BufferedImage texture) {
+    public static void render(BufferedImage img, ArrayList<V[][]> figures, BufferedImage texture, double alpha, double beta, double gamma, double[][] z_buffer) {
 
         for (int i = 0; i < figures.size(); i++) {
             V v1 = figures.get(i)[0][0];
             V v2 = figures.get(i)[1][0];
             V v3 = figures.get(i)[2][0];
-            V normal1 = figures.get(i)[0][2];
-            V normal2 = figures.get(i)[1][2];
-            V normal3 = figures.get(i)[2][2];
             V texture_coordinates1 = figures.get(i)[0][1];
             V texture_coordinates2 = figures.get(i)[1][1];
             V texture_coordinates3 = figures.get(i)[2][1];
-
-            double alpha = -90 * (Math.PI / 180);
-            double beta = 90 * (Math.PI / 180);
-            double gamma = 180 * (Math.PI / 180);
+            V normal1 = figures.get(i)[0][2];
+            V normal2 = figures.get(i)[1][2];
+            V normal3 = figures.get(i)[2][2];
 
             v1 = rotate(alpha, beta, gamma, v1);
             v2 = rotate(alpha, beta, gamma, v2);
@@ -41,9 +27,9 @@ public class Render {
             normal2 = rotate(alpha, beta, gamma, normal2);
             normal3 = rotate(alpha, beta, gamma, normal3);
 
-            V a = v2.sub(v1);
-            V b = v3.sub(v1);
-            V t = a.crossProduct(b);
+            V AB = v2.sum(v1.scalarMult(-1));
+            V AC = v3.sum(v1.scalarMult(-1));
+            V t = AB.crossProduct(AC);
             t.normalize();
             V l = new V(new double[]{0, 0, -1});
             double check = t.scalarProduct(l);
@@ -53,11 +39,11 @@ public class Render {
             double n3 = normal3.scalarProduct(l);
 
             if (check >= 0) {
-                V v = new V(new double[]{500, 500, -500});
+                V v = new V(new double[]{500, 500, 0});
                 v1 = v1.sum(v);
                 v2 = v2.sum(v);
                 v3 = v3.sum(v);
-                Triangle(img, v1, v2, v3, n1, n2, n3, texture_coordinates1, texture_coordinates2, texture_coordinates3, texture);
+                Triangle(img, z_buffer, v1, v2, v3, n1, n2, n3, texture_coordinates1, texture_coordinates2, texture_coordinates3, texture, AB, AC);
             }
         }
     }
@@ -121,7 +107,7 @@ public class Render {
     }
 
 
-    public static void Triangle(BufferedImage img, V v1, V v2, V v3, double n1, double n2, double n3, V texture_coordinates1, V texture_coordinates2, V texture_coordinates3, BufferedImage texture) {
+    public static void Triangle(BufferedImage img, double[][] z_buffer, V v1, V v2, V v3, double n1, double n2, double n3, V texture_coordinates1, V texture_coordinates2, V texture_coordinates3, BufferedImage texture, V AB, V AC) {
         double x1 = v1.arr[0];
         double y1 = v1.arr[1];
         double z1 = v1.arr[2];
@@ -151,35 +137,31 @@ public class Render {
 
         for (int i = minx; i <= maxx; i++) {
             for (int j = miny; j <= maxy; j++) {
-                V2 A = new V2(x1, y1);
-                V2 B = new V2(x2, y2);
-                V2 C = new V2(x3, y3);
-                V2 P = new V2(i, j);
+                V PA = new V(new double[]{x1, y1}).sum(new V(new double[]{i, j}).scalarMult(-1));
+                V V = new V(new double[]{AB.arr[0], AC.arr[0], PA.arr[0]}).crossProduct(new V(new double[]{AB.arr[1], AC.arr[1], PA.arr[1]}));
 
-                V2 AB = B.sub(A);
-                V2 AC = C.sub(A);
-                V2 PA = A.sub(P);
+                double u = (V.arr[0] / V.arr[2]);
+                double v = (V.arr[1] / V.arr[2]);
 
-                double u = (AC.x * PA.y - PA.x * AC.y) / (AB.x * AC.y - AC.x * AB.y);
-                double v = (PA.x * AB.y - AB.x * PA.y) / (AB.x * AC.y - AC.x * AB.y);
+                if (u + v <= 1 && u >= 0 && v >= 0) {
+                    double n = n1 * (1 - u - v) + n2 * u + n3 * v;
+                    n = Math.max(0, n);
 
-                double z = z1 * (1 - u - v) + z2 * u + z3 * v;
-                double n = n1 * (1 - u - v) + n2 * u + n3 * v;
-                n = Math.max(0, n);
+                    double z = z1 * (1 - u - v) + z2 * u + z3 * v;
 
-
-                double texture_x = (texture_coordinates1.arr[0] * (1 - u - v) + texture_coordinates2.arr[0] * u + texture_coordinates3.arr[0] * v) * texture.getWidth();
-                double texture_y = (1 - (texture_coordinates1.arr[1] * (1 - u - v) + texture_coordinates2.arr[1] * u + texture_coordinates3.arr[1] * v)) * texture.getHeight();
+                    double texture_x = (texture_coordinates1.arr[0] * (1 - u - v) + texture_coordinates2.arr[0] * u + texture_coordinates3.arr[0] * v) * texture.getWidth();
+                    double texture_y = (1 - (texture_coordinates1.arr[1] * (1 - u - v) + texture_coordinates2.arr[1] * u + texture_coordinates3.arr[1] * v)) * texture.getHeight();
 
 
-                if (u + v <= 1 && u >= 0 && v >= 0 && z_buffer[i][j] >= z) {
-                    int rgb = texture.getRGB((int) texture_x, (int) texture_y);
-                    Color textureColor = new Color(rgb);
-                    int textureColorR = textureColor.getRed();
-                    int textureColorG = textureColor.getGreen();
-                    int textureColorB = textureColor.getBlue();
-                    img.setRGB(i, j, new Color((int) (n * textureColorR), (int) (n * textureColorG), (int) (n * textureColorB)).getRGB());
-                    z_buffer[i][j] = z;
+                    if (z <= z_buffer[i][j]) {
+                        int rgb = texture.getRGB((int) texture_x, (int) texture_y);
+                        Color textureColor = new Color(rgb);
+                        int textureColorR = textureColor.getRed();
+                        int textureColorG = textureColor.getGreen();
+                        int textureColorB = textureColor.getBlue();
+                        img.setRGB(i, j, new Color((int) (n * textureColorR), (int) (n * textureColorG), (int) (n * textureColorB)).getRGB());
+                        z_buffer[i][j] = z;
+                    }
                 }
             }
         }

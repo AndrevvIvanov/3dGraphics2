@@ -25,11 +25,16 @@ public class Main extends JFrame {
     static ArrayList<V> texture_coordinates = new ArrayList<>();
     static ArrayList<V> normals = new ArrayList<>();
     static ArrayList<V[][]> figures = new ArrayList<>();
+    static double alpha = -90 * (Math.PI / 180);
+    static double beta = 90 * (Math.PI / 180);
+    static double gamma = 180 * (Math.PI / 180);
     static BufferedImage texture = null;
+    static double[][] z_buffer = new double[Main.w][Main.h];
+
 
     public static void draw(Graphics2D g) {
         BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-        Render.render(img, figures, texture);
+        Render.render(img, figures, texture, alpha, beta, gamma, z_buffer);
         g.drawImage(img, 0, 0, null);
     }
 
@@ -81,13 +86,17 @@ public class Main extends JFrame {
             }
         }
 
+        for (int i = 0; i < z_buffer.length; i++) {
+            for (int j = 0; j < z_buffer[0].length; j++) {
+                z_buffer[i][j] = Integer.MAX_VALUE;
+            }
+        }
 
         try {
             texture = ImageIO.read(new File("uaz_med_white_d.png"));
         } catch (IOException e) {
             e.printStackTrace();
         }
-
 
         Main jf = new Main();
         jf.setSize(w, h);
@@ -96,12 +105,19 @@ public class Main extends JFrame {
         jf.setVisible(true);
         jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         jf.createBufferStrategy(2);
+
+
         while (true) {
             long frameLength = 1000 / 60; //пытаемся работать из рассчета  60 кадров в секунду
             long start = System.currentTimeMillis();
             BufferStrategy bs = jf.getBufferStrategy();
             Graphics2D g = (Graphics2D) bs.getDrawGraphics();
             g.clearRect(0, 0, jf.getWidth(), jf.getHeight());
+
+            alpha += 15 * (Math.PI / 180);
+            //beta += 15 * (Math.PI / 180);
+            //gamma += 15 * (Math.PI / 180);
+
             draw(g);
 
             bs.show();
@@ -112,6 +128,13 @@ public class Main extends JFrame {
             if (len < frameLength) {
                 Thread.sleep(frameLength - len);
             }
+
+            for (int i = 0; i < z_buffer.length; i++) {
+                for (int j = 0; j < z_buffer[0].length; j++) {
+                    z_buffer[i][j] = Integer.MAX_VALUE;
+                }
+            }
+
         }
 
     }
